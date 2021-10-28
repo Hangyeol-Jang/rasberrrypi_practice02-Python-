@@ -40,7 +40,6 @@ def generate_request():
             #print_rms(rms)
 
 def getVoice2Text():	
-    print ("\n\n음성인식을 시작합니다.\n\n종료하시려면 Ctrl+\ 키를 누루세요.\n\n\n")
     channel = grpc.secure_channel('{}:{}'.format(HOST, PORT), UA.getCredentials())
     stub = gigagenieRPC_pb2_grpc.GigagenieStub(channel)
     request = generate_request()
@@ -61,17 +60,7 @@ def getVoice2Text():
                   % (response.resultCd, response.recognizedText))
             break
 
-    print ("\n\n인식결과: %s \n\n\n" % (resultText))
+    print ("인식결과: %s \n" % (resultText))
     return resultText
 
-def main():
-    # STT
-    text = getVoice2Text()
-    #text = "HI"
-    pw = getVoice2Text()
-    r = requests.post("http://192.168.0.30:8080/test",data={"name":text, "pw":pw}).text
-    print(r)
-
-if __name__ == '__main__':
-    main()
 

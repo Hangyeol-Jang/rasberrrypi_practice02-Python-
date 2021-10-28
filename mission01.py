@@ -9,14 +9,21 @@ import socket
 from _thread import *
 import time
 
+# 로그인 요청
+import requests
+
 # stt 모듈을 임포트
 from mission01_stt import getVoice2Text
+
+# tts 모듈 임포트
+from mission01_tts import getText2VoiceStream
+import MicrophoneStream as MS
 
 # 채팅 프로그램 접속 주소
 HOST = "115.85.182.118"
 PORT = 43503
 
-def chatting():
+def chatting(user):
 	print("접속 중 ...")
 	client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	client_socket.connect( (HOST, PORT) )
@@ -33,6 +40,7 @@ def chatting():
 	start_new_thread( execute, () )
 
 	print("입력 시작")
+	client_socket.sendall(  (user +"\n" ).encode("ms949") )
 	while True:
 		# stt로 채팅 내용을 받습니다.
 		ctx = getVoice2Text()
@@ -44,11 +52,33 @@ def chatting():
 		client_socket.sendall(  (ctx +"\n" ).encode("ms949") )
 
 	client_socket.close()
+	
+def login():
+	print("로그인을 진행합니다")
+	print()
+	print("아이디를 말씀해주세요")
+	user = getVoice2Text()
+	
+	print("패스워드를 말씀해주세요")
+	pw = getVoice2Text()
+	
+	r = requests.post("http://192.168.0.30:8080/mission01login",data={"id":user, "pw":pw}).text
+	
+	if r=="":
+		print("존재하지 않는 유저입니다.")
+		return None
+	else:
+		output_file = "testtts.wav"
+		getText2VoiceStream("{0} 님 환영합니다!!!           아!!!".format(r) , output_file)
+		MS.play_file(output_file)
+		return r
 
 def main():
 	
+	user = login()
 	
-	chatting()
+	if user is not None:
+		chatting(user)
 	
 	print("프로그램 종료")
 
